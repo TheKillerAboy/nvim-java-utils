@@ -40,6 +40,5 @@ luac.out
 *.hex
 
 /luarocks
-/lua
 /lua_modules
 /.luarocks
