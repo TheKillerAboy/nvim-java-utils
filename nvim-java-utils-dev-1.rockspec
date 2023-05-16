@@ -1,6 +1,5 @@
-rockspec_format = "3.0"
 package = "nvim-java-utils"
-version = "0.1.0-1"
+version = "dev-1"
 source = {
    url = "git+ssh://git@github.com/TheKillerAboy/nvim-java-utils.git"
 }
@@ -8,14 +7,17 @@ description = {
    homepage = "*** please enter a project homepage ***",
    license = "*** please specify a license ***"
 }
-description = {
+
+dependencies = {
   "lua >= 5.4",
-  "xmlparser 2.2-2"
+  "xml2lua >= 1.5-2"
 }
+
 build = {
    type = "builtin",
    modules = {
       ["nvim-java-utils.init"] = "lua/nvim-java-utils/init.lua",
+      ["nvim-java-utils.log"] = "lua/nvim-java-utils/log.lua",
       ["nvim-java-utils.src"] = "lua/nvim-java-utils/src.lua"
    }
 }

@@ -1,34 +1,25 @@
-local xml = require("xmlreader")
-
 local M = {}
 
+local xml2lua = require("xml2lua")
+
 function get_eclipse_mvn_project_file()
-  local project_file = vim.fs.find('.project', {
-    type = 'files',
+  local project_file = vim.fs.find({'.project'}, {
+    type = 'file',
   })
 
-  if #project_file < 0 then
+  if #project_file < 1 then
     return nil
   end
 
-  return project_file[0];
+  return project_file[1]
 end
 
 function read_eclipse_mvn_project_file(fname)
-  fhandle = io.open(fname, 'r')
-  data = fhandle:read("*a")
-
-  local r = assert(xmlreader.from_string(data));
-
-  while(r.read()) do
-    if(r:node_type() == 'element') then
-      if(r:name() == "classpathentry") then
-        r:move_to_next_attribute()
-      end
-    end
-  end
+   vim.notify(fname, vim.log.levels.INFO, nil)
 end
 
 function M.get_src_dir()
-  vim.fn.getcwd()
+  return read_eclipse_mvn_project_file(get_eclipse_mvn_project_file())
 end
+
+return M
