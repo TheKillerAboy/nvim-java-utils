@@ -10,7 +10,8 @@ description = {
 
 dependencies = {
   "lua >= 5.4",
-  "xml2lua >= 1.5-2"
+  "xml2lua >= 1.5-2",
+  "lualogging >= 1.8.2-1"
 }
 
 build = {

@@ -1,25 +1,49 @@
 local M = {}
 
 local xml2lua = require("xml2lua")
+local xml_handler = require("xmlhandler.tree")
+local xml_parser = xml2lua.parser(xml_handler)
 
-function get_eclipse_mvn_project_file()
-  local project_file = vim.fs.find({'.project'}, {
+local logger = require("nvim-java-utils.log").getLogger()
+
+local function get_eclipse_mvn_classpath_file()
+  local classpath_file = vim.fs.find({'.classpath'}, {
     type = 'file',
   })
 
-  if #project_file < 1 then
+  if #classpath_file < 1 then
     return nil
   end
 
-  return project_file[1]
+  return classpath_file[1]
 end
 
-function read_eclipse_mvn_project_file(fname)
-   vim.notify(fname, vim.log.levels.INFO, nil)
+local function read_eclipse_mvn_classpath_file(fname)
+  local handler = io.open(fname, "r")
+  io.input(handler)
+  local data = io.read("all*")
+  io.close(handler)
+
+  -- logger:debug(data)
+
+  xml_parser:parse(data)
+
+  for _, entry in pairs(xml_handler.root.classpath.classpathentry) do
+    local attrs = entry._attr
+    if(attrs.kind == 'src' and attrs.output == 'target/classes' and attrs.excluding == nil) then
+      return attrs.path
+    end
+  end
 end
 
 function M.get_src_dir()
-  return read_eclipse_mvn_project_file(get_eclipse_mvn_project_file())
+  classpath_file = get_eclipse_mvn_classpath_file()
+
+  logger:info(string.format("Found Classpath File(%s)", classpath_file))
+
+  java_source = read_eclipse_mvn_classpath_file(classpath_file)
+
+  logger:info(string.format("Found Java Source(%s)", java_source))
 end
 
 return M

@@ -1,12 +1,25 @@
 local M = {}
 
-function M.log(message)
-  local log_file_path = './log/nvim-java-utils.log'
-  local log_file_handle = io.open(log_file_path, "a")
+require("logging.file")
 
-  io.output(log_file_handle)
-  io.write(message)
-  io.close(log_file_handle)
+function M.getLogFile()
+  return '/var/log/nvim-java-utils.log'
+end
+
+local logger = logging.file.new {
+  filename = M.getLogFile(),
+}
+logger:setLevel(logger.DEBUG)
+
+function M.getLogger()
+  return logger
+end
+
+function logger.logLine(self, level)
+  if(level == nil) then
+    level = self.level
+  end
+  self:log(level, "=================================================")
 end
 
 return M
