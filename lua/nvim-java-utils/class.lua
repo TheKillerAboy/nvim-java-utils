@@ -52,7 +52,6 @@ function M.class()
   local javaClassCreator = JavaClassCreator{
     size = {
       width = 40,
-      height = 5
     },
     packages = {
       "za",
@@ -62,7 +61,7 @@ function M.class()
       "za.co.shoprite.awpexec.command"
     },
     source = "/src/main/java",
-    create_class = function ( package, classname )
+    create_class = function ( package, classname , openfile)
       vim.notify("Creating Class " .. classname .. " in package " .. package)
     end
   }

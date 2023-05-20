@@ -1,6 +1,5 @@
 local Label = require("nvim-java-utils.ui.label")
 local Menu = require("nui.menu")
-local event = require("nui.utils.autocmd").event
 local logger = require("nvim-java-utils.log").getLogger()
 
 local Dropdown = Label:extend("NuiDropdown")
@@ -75,20 +74,6 @@ function Dropdown:init(title)
   self.selected_item_index = 0
 
   Dropdown.super.init(self, title, "")
-end
-
-function Dropdown:render()
-  local title_obj = self:_get_title_obj()
-  local item_obj = self:_get_item_obj(title_obj)
-
-  self:_ensure_buf_ready_for_render()
-
-  if title_obj:length() > 0 then
-    title_obj:render(self.parent.bufnr, self.parent.ns_id, self.linenr, 0)
-  end
-  item_obj:render(self.parent.bufnr, self.parent.ns_id, self.linenr, title_obj:length())
-
-  return title_obj, item_obj
 end
 
 function Dropdown:_get_menu_map_settings()
