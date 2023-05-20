@@ -1,113 +1,92 @@
 local Label = require("nvim-java-utils.ui.label")
-local Menu = require("nui.menu")
-local event = require("nui.utils.autocmd").event
+local Popup = require("nui.popup")
 local logger = require("nvim-java-utils.log").getLogger()
 
-local Dropdown = Label:extend("NuiDropdown")
+local Input = Label:extend("NuiInput")
 
-function Dropdown:_get_item_text()
-  if self.selected_item_index > 0 and self.selected_item_index <= #self.items then
-    return self.items[self.selected_item_index]
-  end
-  return ""
-end
-
-function Dropdown:_get_menu_lines(width)
-  local lines = {}
-
-  for _, item in pairs(self.items) do
-    table.insert(lines, Menu.item(string.rep(" ", width - string.len(item)) .. item))
-  end
-
-  return lines
-end
-
-function Dropdown:_get_menu_obj(title_obj, item_obj)
-  return Menu(
-    {
-      relative = {
-        type = 'editor',
-        winid = self.parent.winid
-      },
-      position = {
-        row = self.parent._.position.row + self.linenr - 1,
-        col = self.parent._.position.col + title_obj:length()
-      },
-      size = {
-        height = #self.items,
-        width = item_obj:length()
-      }
+function Input:_get_input_obj(title_obj, item_obj)
+  return Popup{
+    enter = true,
+    focusable = true,
+    relative = "editor",
+    position = {
+      row = self.parent._.position.row + self.linenr - 1,
+      col = self.parent._.position.col + title_obj:length()
     },
-    {
-      lines = self:_get_menu_lines(item_obj:length()),
-      on_submit = function(item)
-        self.selected_item_index = self:get_index(item)
-        self:render()
-      end
+    size = {
+      width = item_obj:length(),
+      height = 1
+    },
+    buf_options = {
+      modifiable = true,
+      readonly = false
     }
-  )
+  }
 end
 
-function Dropdown:get_index(item_meta)
-  local item = string.gsub(item_meta.text, " +(.*)", "%1")
-
-  for i, v in pairs(self.items) do
-    if item == v then
-      return i
-    end
-  end
-  return error("Out of range")
+function Input:init(title)
+  Input.super.init(self, title, "")
 end
 
-function Dropdown:set_items(items)
-  self.items = items
+function Input:_get_input_map_settings()
+  return {
+    key = '<Enter>',
+    force = {noremap = true, nowait = true}
+  }
 end
 
-function Dropdown:init(title)
-  Dropdown.super.init(self, title, "")
-end
-
-function Dropdown:mount()
+function Input:mount()
   local title_obj, item_obj = self:render()
 
-  local menu_obj = self:_get_menu_obj(title_obj, item_obj)
+  local input_obj = self:_get_input_obj(title_obj, item_obj)
 
-  logger:debug("Menu Object Metadata: " .. vim.inspect(menu_obj._))
-
-  local menu_map_settings = self:_get_menu_map_settings()
+  local input_map_settings = self:_get_input_map_settings()
 
   self.parent:map(
-    menu_map_settings.mode,
-    menu_map_settings.key,
+    'n',
+    input_map_settings.key,
     function()
       local cursor = vim.api.nvim_win_get_cursor(self.parent.winid)
       if(cursor[1] == self.linenr) then
-        menu_obj:mount()
-        if self.selected_item_index > 0 then
-          vim.api.nvim_win_set_cursor(menu_obj.winid, {self.selected_item_index, 0})
-        end
+        logger:info("Input popup mount")
+        input_obj:mount()
+        input_obj:show()
+        vim.api.nvim_buf_set_lines(input_obj.bufnr, 0, 1, true, { self.item })
+        vim.cmd("startinsert")
+        vim.api.nvim_win_set_cursor(input_obj.winid, {1, string.len(self.item) + 1})
       end
     end,
-    menu_map_settings.force
+    input_map_settings.force
   )
 
-  self.parent:on(
-    event.BufLeave,
+  input_obj:map(
+    'i',
+    '<Enter>',
     function()
-      self:unmount()
-    end
+      logger:info("Input popup unmount")
+      local text = vim.api.nvim_buf_get_lines(input_obj.bufnr, 0, 1, true)
+      input_obj:hide()
+      if #text == 0 then
+        self.item = ""
+      else
+        self.item = text[1]
+      end
+      vim.cmd("stopinsert")
+      self:render()
+    end,
+    input_map_settings.force
   )
-  logger:info("Dropdown Mount")
+
+  input_obj:map(
+    'i',
+    '<Esc>',
+    function()
+      logger:info("Input popup unmount")
+      input_obj:hide()
+      vim.cmd("stopinsert")
+    end,
+    input_map_settings.force
+  )
 end
 
-function Dropdown:unmount()
-  local menu_map_settings = self:_get_menu_map_settings()
-  self.parent:unmap(
-    menu_map_settings.mode,
-    menu_map_settings.key,
-    menu_map_settings.force
-  )
-  logger:info("Dropdown Unmount")
-end
-
-return Dropdown
+return Input
