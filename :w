@@ -79,33 +79,16 @@ end
 function JavaClassCreator:_get_confirm_obj(options)
   local confirm = Button("Confirm", { justify = 'middle' })
   confirm:set_parent(self.popup_obj, self:_get_next_linenr())
-  confirm:set_handle(
-    function()
-      local package = self.packages_obj:get_selected_item()
-      local classname = self.classname_obj:get_input()
-
-      if package == nil then
-        vim.notify("No package was selected", vim.log.levels.ERROR)
-        return
-      end
-
-      if classname == "" then
-        vim.notify("No classname was entered", vim.log.levels.ERROR)
-        return
-      end
-
-      options.create_class(package, classname)
-
-      self:unmount()
-    end
-  )
+  confirm:set_handle(self:create_class)
   return confirm
+end
+
+function JavaClassCreator:create_class()
+  vim.notify("Creating Class")
 end
 
 function JavaClassCreator:init(options)
   self.linenr = 0
-
-  options.size.height = 4
 
   self.mapped_keys = {}
 
@@ -122,23 +105,6 @@ function JavaClassCreator:mount()
   self.packages_obj:mount()
   self.classname_obj:mount()
   self.confirm_obj:mount()
-
-  self.popup_obj:map(
-    'n',
-    '<Esc>',
-    function()
-      self:unmount()
-    end,
-    {noremap = true, nowait = true}
-  )
-end
-
-function JavaClassCreator:unmount()
-  self.src_obj:unmount()
-  self.packages_obj:unmount()
-  self.classname_obj:unmount()
-  self.confirm_obj:unmount()
-  self.popup_obj:unmount()
 end
 
 return JavaClassCreator

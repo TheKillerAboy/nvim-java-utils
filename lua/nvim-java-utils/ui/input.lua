@@ -35,6 +35,10 @@ function Input:_get_input_map_settings()
   }
 end
 
+function Input:get_input()
+  return self.item
+end
+
 function Input:mount()
   local title_obj, item_obj = self:render()
 
