@@ -48,6 +48,13 @@ function Dropdown:_get_menu_obj(title_obj, item_obj)
   )
 end
 
+function Dropdown:get_selected_item()
+  if self.selected_item_index > 0 and self.selected_item_index <= #self.items then
+    return self.items[self.selected_item_index]
+  end
+  return nil
+end
+
 function Dropdown:get_index(item_meta)
   local item = string.gsub(item_meta.text, " +(.*)", "%1")
 
@@ -114,23 +121,7 @@ function Dropdown:mount()
     menu_map_settings.force
   )
 
-  self.parent:on(
-    event.BufLeave,
-    function()
-      self:unmount()
-    end
-  )
   logger:info("Dropdown Mount")
-end
-
-function Dropdown:unmount()
-  local menu_map_settings = self:_get_menu_map_settings()
-  self.parent:unmap(
-    menu_map_settings.mode,
-    menu_map_settings.key,
-    menu_map_settings.force
-  )
-  logger:info("Dropdown Unmount")
 end
 
 return Dropdown

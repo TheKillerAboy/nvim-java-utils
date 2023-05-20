@@ -65,4 +65,7 @@ function Label:mount()
   self:render()
 end
 
+function Label:unmount()
+end
+
 return Label

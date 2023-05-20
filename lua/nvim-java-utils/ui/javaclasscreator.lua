@@ -3,6 +3,7 @@ local Popup = require("nui.popup")
 local Dropdown = require("nvim-java-utils.ui.dropdown")
 local Label = require("nvim-java-utils.ui.label")
 local Input = require("nvim-java-utils.ui.input")
+local Button = require("nvim-java-utils.ui.button")
 local logger = require("nvim-java-utils.log").getLogger()
 
 local JavaClassCreator = Object("JavaClassCreator")
@@ -69,15 +70,42 @@ function JavaClassCreator:_get_package_obj(options)
   return package
 end
 
-
 function JavaClassCreator:_get_classname_obj(options)
   local classname = Input("Classname")
   classname:set_parent(self.popup_obj, self:_get_next_linenr())
   return classname
 end
 
+function JavaClassCreator:_get_confirm_obj(options)
+  local confirm = Button("Confirm", { justify = 'middle' })
+  confirm:set_parent(self.popup_obj, self:_get_next_linenr())
+  confirm:set_handle(
+    function()
+      local package = self.packages_obj:get_selected_item()
+      local classname = self.classname_obj:get_input()
+
+      if package == nil then
+        vim.notify("No package was selected", vim.log.levels.ERROR)
+        return
+      end
+
+      if classname == "" then
+        vim.notify("No classname was entered", vim.log.levels.ERROR)
+        return
+      end
+
+      options.create_class(package, classname)
+
+      self:unmount()
+    end
+  )
+  return confirm
+end
+
 function JavaClassCreator:init(options)
   self.linenr = 0
+
+  options.size.height = 4
 
   self.mapped_keys = {}
 
@@ -85,6 +113,7 @@ function JavaClassCreator:init(options)
   self.src_obj = self:_get_src_obj(options)
   self.packages_obj = self:_get_package_obj(options)
   self.classname_obj = self:_get_classname_obj(options)
+  self.confirm_obj = self:_get_confirm_obj(options)
 end
 
 function JavaClassCreator:mount()
@@ -92,6 +121,24 @@ function JavaClassCreator:mount()
   self.src_obj:mount()
   self.packages_obj:mount()
   self.classname_obj:mount()
+  self.confirm_obj:mount()
+
+  self.popup_obj:map(
+    'n',
+    '<Esc>',
+    function()
+      self:unmount()
+    end,
+    {noremap = true, nowait = true}
+  )
+end
+
+function JavaClassCreator:unmount()
+  self.src_obj:unmount()
+  self.packages_obj:unmount()
+  self.classname_obj:unmount()
+  self.confirm_obj:unmount()
+  self.popup_obj:unmount()
 end
 
 return JavaClassCreator

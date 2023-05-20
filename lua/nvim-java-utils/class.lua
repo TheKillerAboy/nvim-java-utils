@@ -57,9 +57,14 @@ function M.class()
     packages = {
       "za",
       "za.co",
-      "za.co.shoprite"
+      "za.co.shoprite",
+      "za.co.shoprite.awpexec",
+      "za.co.shoprite.awpexec.command"
     },
-    source = "/src/main/java"
+    source = "/src/main/java",
+    create_class = function ( package, classname )
+      vim.notify("Creating Class " .. classname .. " in package " .. package)
+    end
   }
 
   javaClassCreator:mount()
