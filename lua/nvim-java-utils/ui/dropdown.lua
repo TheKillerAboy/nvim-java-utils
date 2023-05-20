@@ -97,8 +97,6 @@ function Dropdown:mount()
 
   local menu_obj = self:_get_menu_obj(title_obj, item_obj)
 
-  logger:debug("Menu Object Metadata: " .. vim.inspect(menu_obj._))
-
   local menu_map_settings = self:_get_menu_map_settings()
 
   self.parent:map(
