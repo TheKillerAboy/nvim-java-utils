@@ -19,12 +19,14 @@ function Label:_get_title_obj()
   return Text(self:_get_title_text())
 end
 
-function Label:_get_item_obj(title_obj)
+function Label:_get_item_obj(title_obj, options)
+  logger:info("Options " .. vim.inspect(options))
+
   local item_text = self:_get_item_text()
-  local whitespace_len = self.parent._.size.width - string.len(item_text) - title_obj:length()
+  local whitespace_len = self.parent._.size.width - string.len(item_text) - title_obj:length() + options.offset
   local final_item_text = string.rep(" ", whitespace_len) .. item_text
 
-  return Text(final_item_text, "Folded")
+  return Text(final_item_text, options.extmark)
 end
 
 function Label:set_parent(parent, linenr)
@@ -40,18 +42,29 @@ function Label:init(title, item)
   self.linenr = 0
 end
 
-function Label:_ensure_buf_ready_for_render()
+function Label:_ensure_buf_ready_for_render(offset)
   local line_buf = vim.api.nvim_buf_get_lines(self.parent.bufnr, self.linenr - 1, self.linenr, false)
   if(#line_buf) then
-    vim.api.nvim_buf_set_lines(self.parent.bufnr, self.linenr - 1, self.linenr, false,{string.rep(" ", self.parent._.size.width)})
+    vim.api.nvim_buf_set_lines(self.parent.bufnr, self.linenr - 1, self.linenr, false,{string.rep(" ", self.parent._.size.width + offset)})
   end
 end
 
-function Label:render()
-  local title_obj = self:_get_title_obj()
-  local item_obj = self:_get_item_obj(title_obj)
+function Label:render(options)
+  if options == nil then
+    options = {}
+  end
 
-  self:_ensure_buf_ready_for_render()
+  if options.item == nil then
+    options.item = {
+      extmark = "Folded",
+      offset = 0
+    }
+  end
+
+  local title_obj = self:_get_title_obj()
+  local item_obj = self:_get_item_obj(title_obj, options.item)
+
+  self:_ensure_buf_ready_for_render(options.item.offset)
 
   if title_obj:length() > 0 then
     title_obj:render(self.parent.bufnr, self.parent.ns_id, self.linenr, 0)

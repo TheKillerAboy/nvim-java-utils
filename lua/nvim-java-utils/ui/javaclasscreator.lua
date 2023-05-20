@@ -4,6 +4,7 @@ local Dropdown = require("nvim-java-utils.ui.dropdown")
 local Label = require("nvim-java-utils.ui.label")
 local Input = require("nvim-java-utils.ui.input")
 local Button = require("nvim-java-utils.ui.button")
+local Checkbox = require("nvim-java-utils.ui.checkbox")
 local logger = require("nvim-java-utils.log").getLogger()
 
 local JavaClassCreator = Object("JavaClassCreator")
@@ -76,6 +77,12 @@ function JavaClassCreator:_get_classname_obj(options)
   return classname
 end
 
+function JavaClassCreator:_get_open_obj(options)
+  local open = Checkbox("Open", { active = true })
+  open:set_parent(self.popup_obj, self:_get_next_linenr())
+  return open
+end
+
 function JavaClassCreator:_get_confirm_obj(options)
   local confirm = Button("Confirm", { justify = 'middle' })
   confirm:set_parent(self.popup_obj, self:_get_next_linenr())
@@ -83,6 +90,7 @@ function JavaClassCreator:_get_confirm_obj(options)
     function()
       local package = self.packages_obj:get_selected_item()
       local classname = self.classname_obj:get_input()
+      local openfile = self.open_obj:get_active()
 
       if package == nil then
         vim.notify("No package was selected", vim.log.levels.ERROR)
@@ -94,7 +102,7 @@ function JavaClassCreator:_get_confirm_obj(options)
         return
       end
 
-      options.create_class(package, classname)
+      options.create_class(package, classname, openfile)
 
       self:unmount()
     end
@@ -105,7 +113,7 @@ end
 function JavaClassCreator:init(options)
   self.linenr = 0
 
-  options.size.height = 4
+  options.size.height = 5
 
   self.mapped_keys = {}
 
@@ -113,6 +121,7 @@ function JavaClassCreator:init(options)
   self.src_obj = self:_get_src_obj(options)
   self.packages_obj = self:_get_package_obj(options)
   self.classname_obj = self:_get_classname_obj(options)
+  self.open_obj = self:_get_open_obj(options)
   self.confirm_obj = self:_get_confirm_obj(options)
 end
 
@@ -121,6 +130,7 @@ function JavaClassCreator:mount()
   self.src_obj:mount()
   self.packages_obj:mount()
   self.classname_obj:mount()
+  self.open_obj:mount()
   self.confirm_obj:mount()
 
   self.popup_obj:map(
@@ -137,6 +147,7 @@ function JavaClassCreator:unmount()
   self.src_obj:unmount()
   self.packages_obj:unmount()
   self.classname_obj:unmount()
+  self.open_obj:unmount()
   self.confirm_obj:unmount()
   self.popup_obj:unmount()
 end
