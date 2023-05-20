@@ -3,8 +3,10 @@ local M = {}
 local xml2lua = require("xml2lua")
 local xml_handler = require("xmlhandler.tree")
 local xml_parser = xml2lua.parser(xml_handler)
-
 local logger = require("nvim-java-utils.log").getLogger()
+local Popup = require("nui.popup")
+local Dropdown = require("nvim-java-utils.ui.dropdown")
+local JavaClassCreator = require("nvim-java-utils.ui.javaclasscreator")
 
 local function get_eclipse_mvn_classpath_file()
   local classpath_file = vim.fs.find({'.classpath'}, {
@@ -44,6 +46,23 @@ function M.get_src_dir()
   java_source = read_eclipse_mvn_classpath_file(classpath_file)
 
   logger:info(string.format("Found Java Source(%s)", java_source))
+end
+
+function M.class()
+  local javaClassCreator = JavaClassCreator{
+    size = {
+      width = 40,
+      height = 5
+    },
+    packages = {
+      "za",
+      "za.co",
+      "za.co.shoprite"
+    },
+    source = "/src/main/java"
+  }
+
+  javaClassCreator:mount()
 end
 
 return M
