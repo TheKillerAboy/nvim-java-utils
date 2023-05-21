@@ -102,7 +102,13 @@ function JavaClassCreator:_get_confirm_obj(options)
         return
       end
 
-      options.create_class(package, classname, openfile)
+      options.handle(
+        package,
+        classname,
+        {
+          openfile = openfile
+        }
+      )
 
       self:unmount()
     end
@@ -113,7 +119,10 @@ end
 function JavaClassCreator:init(options)
   self.linenr = 0
 
-  options.size.height = 5
+  options.size = {
+    width = "40%",
+    height = 5
+  }
 
   self.mapped_keys = {}
 

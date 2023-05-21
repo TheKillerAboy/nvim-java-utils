@@ -92,6 +92,13 @@ local write_lockfile = function(opts, deps)
   io.close(handle)
 end
 
+function M.get_plugin_dir()
+  local opts = {}
+  opts.plugin_build_lua_path = get_plugin_build_lua_path()
+  opts = get_plugin_dir(opts)
+  return opts.plugin_root_dir
+end
+
 function M.bootstrap(opts)
   opts.plugin_build_lua_path = get_plugin_build_lua_path()
   opts = get_plugin_dir(opts)
