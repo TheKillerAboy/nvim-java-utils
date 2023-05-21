@@ -25,7 +25,7 @@ end
 
 function M.setup()
   local logger = require("nvim-java-utils.log").getLogger()
-  local class = require("nvim-java-utils.class")
+  local javautilscreateclass = require("nvim-java-utils.commands.javautilsclasscreate")
 
   logger:logLine(logger.INFO)
   logger:info("Setup nvim-java-utils")
@@ -33,7 +33,7 @@ function M.setup()
   create_user_commd(
     logger,
     'JavaUtilsCreateClass',
-    class.class,
+    javautilscreateclass.command,
     {nargs = 0}
   )
 end
