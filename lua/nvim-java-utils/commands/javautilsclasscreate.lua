@@ -73,6 +73,8 @@ local function get_packages(source)
     table.insert(packages, key)
   end
 
+  table.sort(packages)
+
   logger:debug("Packages: " .. vim.inspect(packages))
 
   return packages
